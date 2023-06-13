@@ -16,7 +16,7 @@ void AMovingPlatform::BeginPlay()
 {
 	Super::BeginPlay();
 
-	
+	StartLocation = GetActorLocation();
 
 }
 
@@ -25,13 +25,25 @@ void AMovingPlatform::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// Initialize the new location vector to the starting position of the platform
-	FVector NewLocation = MyVector;
+    // Move platform forwards 
+        // Get current location
+	FVector CurrentLocation = GetActorLocation();
+        // Add vector to that location
+	CurrentLocation = CurrentLocation + PlatformVelocity * DeltaTime;
+        // Set the location
+	SetActorLocation(CurrentLocation);
+    // Send platform back if gone to far
+		// Check how far we moved
+	float DistanceMoved = FVector::Dist(StartLocation, CurrentLocation);
+		// Reverse direction of motion if gone to far
+	if (DistanceMoved > MoveDistance)
+	{
+		FVector MoveDirection = PlatformVelocity.GetSafeNormal();
+		StartLocation = StartLocation + MoveDirection * MoveDistance;
+		SetActorLocation(StartLocation);
+		PlatformVelocity = -PlatformVelocity;
+		
+	}
 
-	// Update the Z component of the new location vector based on the current time
-	float Time = GetWorld()->GetTimeSeconds();
-	NewLocation.Z = 4055.0f + FMath::Sin(Time * 2.0f * PI / 3.0f) * 150.0f;
-
-	// Set the new location of the platform
-	SetActorLocation(NewLocation);
+	
 }
